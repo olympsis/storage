@@ -1,0 +1,13 @@
+FROM golang:1.20-bullseye
+WORKDIR /app
+COPY ./ ./
+RUN go build -o /docker
+RUN go mod download
+ENV PORT=8082
+ENV STORAGE_ADDR=192.168.1.205:9000
+ENV STORAGE_ACCESS_KEY=p4eHM3a4v3wGB2ro
+ENV STORAGE_SECRET_KEY=WbPjehYtD3wO4V4PNlYwJwWiPRy6qqqN
+
+EXPOSE 8082
+
+CMD ["/docker"]
