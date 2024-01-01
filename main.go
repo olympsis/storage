@@ -23,8 +23,8 @@ func main() {
 	storage := service.NewStorageService(l, r)
 	storage.ConnectToClient()
 
-	r.Handle("/v1/storage/{fileBucket}", storage.UploadObject()).Methods("POST")
-	r.Handle("/v1/storage/{fileBucket}", storage.DeleteObject()).Methods("DELETE")
+	r.Handle("/storage/{fileBucket}", storage.UploadObject()).Methods("POST")
+	r.Handle("/storage/{fileBucket}", storage.DeleteObject()).Methods("DELETE")
 
 	port := os.Getenv("PORT")
 

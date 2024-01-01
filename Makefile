@@ -5,9 +5,6 @@ PKG_LIST := $( go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $( find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 
 export PORT=80
-export STORAGE_ADDR=192.168.1.205:9000
-export STORAGE_ACCESS_KEY=p4eHM3a4v3wGB2ro
-export STORAGE_SECRET_KEY=WbPjehYtD3wO4V4PNlYwJwWiPRy6qqqN
 
 .PHONY: all dep build clean test coverage coverhtml lint
 

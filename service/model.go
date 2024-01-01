@@ -1,13 +1,14 @@
 package service
 
 import (
+	"cloud.google.com/go/storage"
 	"github.com/gorilla/mux"
-	"github.com/minio/minio-go/v7"
 	"github.com/sirupsen/logrus"
 )
 
 type Service struct {
-	Client *minio.Client
-	Logger *logrus.Logger
-	Router *mux.Router
+	Client      *storage.Client
+	Logger      *logrus.Logger
+	Router      *mux.Router
+	AccessToken *string
 }

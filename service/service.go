@@ -1,15 +1,15 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 
+	"cloud.google.com/go/storage"
 	"github.com/gorilla/mux"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/api/option"
 )
 
 func NewStorageService(l *logrus.Logger, r *mux.Router) *Service {
@@ -17,21 +17,12 @@ func NewStorageService(l *logrus.Logger, r *mux.Router) *Service {
 }
 
 func (s *Service) ConnectToClient() {
-	endpoint := os.Getenv("STORAGE_ADDR")
-	accessKey := os.Getenv("STORAGE_ACCESS_KEY")
-	secretKey := os.Getenv("STORAGE_SECRET_KEY")
-	useSSL := false
-
-	// Initialize minio client object.
-	minioClient, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-		Secure: useSSL})
+	filePath := "files/credentials.json"
+	client, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(filePath))
 	if err != nil {
-		s.Logger.Fatalln(err)
-	} else {
-		s.Client = minioClient
-		s.Logger.Info("connected to minio client...")
+		s.Logger.Fatal("failed to create client" + err.Error())
 	}
+	s.Client = client
 }
 
 func (s *Service) UploadObject() http.HandlerFunc {
