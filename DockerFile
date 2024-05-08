@@ -6,23 +6,6 @@ RUN go mod download
 
 ENV PORT=80
 
-ENV KEY_ID=JN25FUC9X2
-ENV TEAM_ID=5A6H49Q85D
-ENV KEY=SZkp78avQkxGyjRakxb5Ob08zqjguNRA
-
-ENV FILE_NAME=./files/AuthKey_JN25FUC9X2.p8
-
-ENV DATABASE_USER=admin
-ENV DATABASE_PASS=vM9pPgfHeZDxgBDv
-
-ENV DATABASE_ADDR=database-2.pdjjqal.mongodb.net
-ENV DATABASE_NAME=notifications
-ENV DATABASE_COL=topics
-
-ENV SERVER_DB_ADDR=database-0.i4q7nvi.mongodb.net
-ENV SERVER_DB_NAME=olympsis
-ENV SERVER_DB_COL=users
-
 EXPOSE 80
 
 CMD ["/docker"]

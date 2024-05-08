@@ -2,33 +2,46 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
 	"cloud.google.com/go/storage"
-	"github.com/gorilla/mux"
+	vision "cloud.google.com/go/vision/v2/apiv1"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/api/option"
 )
 
-func NewStorageService(l *logrus.Logger, r *mux.Router) *Service {
-	return &Service{Logger: l, Router: r}
+func NewStorageService(l *logrus.Logger) *Service {
+	return &Service{Logger: l}
 }
 
-func (s *Service) ConnectToClient() {
+func (s *Service) ConnectToClient() error {
 	filePath := "./files/credentials.json"
+
+	// Storage Client
 	client, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(filePath))
 	if err != nil {
-		s.Logger.Fatal("failed to create client" + err.Error())
+		s.Logger.Fatal("Failed to create client: " + err.Error())
+		return err
 	}
 	s.Client = client
+
+	// Computer Vision Client
+	vClient, err := vision.NewImageAnnotatorClient(context.TODO(), option.WithCredentialsFile(filePath))
+	if err != nil {
+		s.Logger.Fatal("Failed to create client: " + err.Error())
+		return err
+	}
+	s.VClient = vClient
+
+	return nil
 }
 
 func (s *Service) UploadObject() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		fileBucket := vars["fileBucket"]
+		fileBucket := r.PathValue("fileBucket")
 		if len(fileBucket) < 1 {
 			http.Error(rw, "invalid file bucket name", http.StatusBadRequest)
 			return
@@ -59,7 +72,30 @@ func (s *Service) UploadObject() http.HandlerFunc {
 			return
 		}
 
-		// Upload file to MinIO server
+		resp, err := s.AnnotateImage(bodyData)
+		if err != nil {
+			s.Logger.Error(err.Error())
+			http.Error(rw, "failed to validate image", http.StatusBadRequest)
+			return
+		}
+
+		var response Response
+
+		// Safety Score
+		safety := s.AggregateSafetyScore(resp.Responses[0])
+		response.Score = *safety
+
+		if *safety == 5 {
+			reason := "Unsafe image"
+			response.Reason = &reason
+
+			rw.WriteHeader(http.StatusBadRequest)
+			rw.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(rw).Encode(response)
+			return
+		}
+
+		// Upload file to Storage server
 		err = s._uploadObject(bodyData, fileBucket, fileName)
 		if err != nil {
 			s.Logger.Error(err.Error())
@@ -67,15 +103,18 @@ func (s *Service) UploadObject() http.HandlerFunc {
 			return
 		}
 
+		url := fileBucket + "/" + fileName
+		response.URL = &url
+
 		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
+		json.NewEncoder(rw).Encode(response)
 	}
 }
 
 func (s *Service) DeleteObject() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		fileBucket := vars["fileBucket"]
+		fileBucket := r.PathValue("fileBucket")
 
 		// Get the filename from the request header.
 		fileName, err := GrabFileName(&r.Header)
