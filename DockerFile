@@ -4,7 +4,7 @@ COPY ./ ./
 RUN go build -o /docker
 RUN go mod download
 
-ENV PORT=80
+ENV STORAGE_PORT=80
 
 EXPOSE 80
 

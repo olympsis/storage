@@ -18,7 +18,7 @@ func main() {
 	l := logrus.New()
 
 	// Environment variables
-	port := os.Getenv("PORT")
+	port := os.Getenv("STORAGE_PORT")
 
 	// Create Service
 	// Connect to Storage & Computer Vision clients
