@@ -36,26 +36,16 @@ func (s *Service) ConnectToClient() error {
 		return err
 	}
 	s.VClient = vClient
+	s.Logger.Info("Connected to GCP Client Successfully!")
 
 	return nil
-}
-
-func (s *Service) CORSHandler() http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Set("Content-Type", "application/json")
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
-		rw.Header().Set("Access-Control-Allow-Credentials", "true")
-		rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		rw.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-Filename")
-		rw.WriteHeader(http.StatusNoContent)
-	}
 }
 
 func (s *Service) UploadObject() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		fileBucket := r.PathValue("fileBucket")
 		if len(fileBucket) < 1 {
-			http.Error(rw, "invalid file bucket name", http.StatusBadRequest)
+			http.Error(rw, `{ "msg" : "invalid file bucket name" }`, http.StatusBadRequest)
 			return
 		}
 
@@ -72,7 +62,7 @@ func (s *Service) UploadObject() http.HandlerFunc {
 		bodyData, err := io.ReadAll(r.Body)
 		if err != nil {
 			s.Logger.Error(err.Error())
-			http.Error(rw, "failed to read body", http.StatusBadRequest)
+			http.Error(rw, `{ "msg" : "failed to read body" }`, http.StatusBadRequest)
 			return
 		}
 
@@ -80,14 +70,14 @@ func (s *Service) UploadObject() http.HandlerFunc {
 		fileName, err := GrabFileName(&r.Header)
 		if err != nil {
 			s.Logger.Error(err.Error())
-			http.Error(rw, "no file name", http.StatusBadRequest)
+			http.Error(rw, `{ "msg" : "no file name in header" }`, http.StatusBadRequest)
 			return
 		}
 
 		resp, err := s.AnnotateImage(bodyData)
 		if err != nil {
 			s.Logger.Error(err.Error())
-			http.Error(rw, "failed to validate image", http.StatusBadRequest)
+			http.Error(rw, `{ "msg" : "failed to validate image" }`, http.StatusBadRequest)
 			return
 		}
 
@@ -111,7 +101,7 @@ func (s *Service) UploadObject() http.HandlerFunc {
 		err = s._uploadObject(bodyData, fileBucket, fileName)
 		if err != nil {
 			s.Logger.Error(err.Error())
-			http.Error(rw, "failed to upload image", http.StatusInternalServerError)
+			http.Error(rw, `{ "msg" : "failed to upload image" }`, http.StatusBadRequest)
 			return
 		}
 
@@ -132,19 +122,19 @@ func (s *Service) DeleteObject() http.HandlerFunc {
 		fileName, err := GrabFileName(&r.Header)
 		if err != nil {
 			s.Logger.Error(err.Error())
-			http.Error(rw, "no file name", http.StatusBadRequest)
+			http.Error(rw, `{ "msg" : "no file name in header" }`, http.StatusBadRequest)
 			return
 		}
 
 		if len(fileBucket) < 1 {
-			http.Error(rw, "invalid file bucket name", http.StatusBadRequest)
+			http.Error(rw, `{ "msg" : "invalid file bucket name" }`, http.StatusBadRequest)
 			return
 		}
 
 		err = s._deleteObject(fileBucket, fileName)
 		if err != nil {
 			s.Logger.Error(err.Error())
-			http.Error(rw, "failed to delete image", http.StatusInternalServerError)
+			http.Error(rw, `{ "msg" : "failed to delete image" }`, http.StatusBadRequest)
 			return
 		}
 
