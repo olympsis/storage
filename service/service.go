@@ -46,7 +46,7 @@ func (s *Service) UploadObject() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		fileBucket := vars["fileBucket"]
-		if len(fileBucket) == 0 || len(fileBucket) < 24 {
+		if len(fileBucket) == 0 {
 			http.Error(rw, `{ "msg" : "invalid file bucket name" }`, http.StatusBadRequest)
 			return
 		}
@@ -120,7 +120,7 @@ func (s *Service) DeleteObject() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		fileBucket := vars["fileBucket"]
-		if len(fileBucket) == 0 || len(fileBucket) < 24 {
+		if len(fileBucket) == 0 {
 			http.Error(rw, `{ "msg" : "invalid file bucket name" }`, http.StatusBadRequest)
 			return
 		}
