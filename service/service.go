@@ -39,6 +39,17 @@ func (s *Service) ConnectToClient() error {
 	return nil
 }
 
+func (s *Service) CORSHandler() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Access-Control-Allow-Credentials", "true")
+		rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		rw.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		rw.WriteHeader(http.StatusNoContent)
+	}
+}
+
 func (s *Service) UploadObject() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		fileBucket := r.PathValue("fileBucket")

@@ -32,6 +32,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /v1/storage/{fileBucket}", n.UploadObject())
 	mux.HandleFunc("DELETE /v1/storage/{fileBucket}", n.DeleteObject())
+	mux.HandleFunc("OPTIONS /v1/storage/{fileBucket}", n.CORSHandler())
 
 	// Server
 	s := &http.Server{
