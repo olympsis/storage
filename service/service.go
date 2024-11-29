@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/v2/apiv1"
@@ -18,7 +19,7 @@ func NewStorageService(l *logrus.Logger) *Service {
 }
 
 func (s *Service) ConnectToClient() error {
-	filePath := "./files/credentials.json"
+	filePath := os.Getenv("FIREBASE_CREDENTIALS_PATH")
 
 	// Storage Client
 	client, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(filePath))

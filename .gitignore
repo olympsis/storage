@@ -1,3 +1,5 @@
 *.p8
 *.p12
 *.pem
+files
+tools/olympsis-storage.conf
