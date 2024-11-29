@@ -10,6 +10,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/v2/apiv1"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/api/option"
 )
@@ -43,8 +44,9 @@ func (s *Service) ConnectToClient() error {
 
 func (s *Service) UploadObject() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		fileBucket := r.PathValue("fileBucket")
-		if len(fileBucket) < 1 {
+		vars := mux.Vars(r)
+		fileBucket := vars["fileBucket"]
+		if len(fileBucket) == 0 || len(fileBucket) < 24 {
 			http.Error(rw, `{ "msg" : "invalid file bucket name" }`, http.StatusBadRequest)
 			return
 		}
@@ -61,7 +63,7 @@ func (s *Service) UploadObject() http.HandlerFunc {
 		// read body data
 		bodyData, err := io.ReadAll(r.Body)
 		if err != nil {
-			s.Logger.Error(err.Error())
+			s.Logger.Error("Failed to read request body. Error: ", err.Error())
 			http.Error(rw, `{ "msg" : "failed to read body" }`, http.StatusBadRequest)
 			return
 		}
@@ -69,14 +71,14 @@ func (s *Service) UploadObject() http.HandlerFunc {
 		// Get the filename from the request header.
 		fileName, err := GrabFileName(&r.Header)
 		if err != nil {
-			s.Logger.Error(err.Error())
+			s.Logger.Error("No filename found in header")
 			http.Error(rw, `{ "msg" : "no file name in header" }`, http.StatusBadRequest)
 			return
 		}
 
 		resp, err := s.AnnotateImage(bodyData)
 		if err != nil {
-			s.Logger.Error(err.Error())
+			s.Logger.Error("Failed to validate image. Error: ", err.Error())
 			http.Error(rw, `{ "msg" : "failed to validate image" }`, http.StatusBadRequest)
 			return
 		}
@@ -100,7 +102,7 @@ func (s *Service) UploadObject() http.HandlerFunc {
 		// Upload file to Storage server
 		err = s._uploadObject(bodyData, fileBucket, fileName)
 		if err != nil {
-			s.Logger.Error(err.Error())
+			s.Logger.Error("Failed to upload file. Error: ", err.Error())
 			http.Error(rw, `{ "msg" : "failed to upload image" }`, http.StatusBadRequest)
 			return
 		}
@@ -116,24 +118,24 @@ func (s *Service) UploadObject() http.HandlerFunc {
 
 func (s *Service) DeleteObject() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		fileBucket := r.PathValue("fileBucket")
+		vars := mux.Vars(r)
+		fileBucket := vars["fileBucket"]
+		if len(fileBucket) == 0 || len(fileBucket) < 24 {
+			http.Error(rw, `{ "msg" : "invalid file bucket name" }`, http.StatusBadRequest)
+			return
+		}
 
 		// Get the filename from the request header.
 		fileName, err := GrabFileName(&r.Header)
 		if err != nil {
-			s.Logger.Error(err.Error())
+			s.Logger.Error("Failed to delete file. No file name in header")
 			http.Error(rw, `{ "msg" : "no file name in header" }`, http.StatusBadRequest)
-			return
-		}
-
-		if len(fileBucket) < 1 {
-			http.Error(rw, `{ "msg" : "invalid file bucket name" }`, http.StatusBadRequest)
 			return
 		}
 
 		err = s._deleteObject(fileBucket, fileName)
 		if err != nil {
-			s.Logger.Error(err.Error())
+			s.Logger.Error(fmt.Sprintf("Failed to delete image (%s). Error: (%s)", fileName, err.Error()))
 			http.Error(rw, `{ "msg" : "failed to delete image" }`, http.StatusBadRequest)
 			return
 		}
