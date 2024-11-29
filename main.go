@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gorilla/mux"
+	"github.com/olympsis/storage/middleware"
 	"github.com/olympsis/storage/service"
 	"github.com/sirupsen/logrus"
 )
@@ -29,10 +31,20 @@ func main() {
 	}
 
 	// Route handler
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /v1/storage/{fileBucket}", n.UploadObject())
-	mux.HandleFunc("DELETE /v1/storage/{fileBucket}", n.DeleteObject())
-	mux.HandleFunc("OPTIONS /v1/storage/{fileBucket}", n.CORSHandler())
+	mux := mux.NewRouter()
+	mux.Handle("/v1/storage/{fileBucket}",
+		middleware.Chain(
+			n.UploadObject(),
+			middleware.CORS(),
+		),
+	).Methods("POST", "OPTIONS")
+
+	mux.Handle("/v1/storage/{fileBucket}",
+		middleware.Chain(
+			n.DeleteObject(),
+			middleware.CORS(),
+		),
+	).Methods("DELETE", "OPTIONS")
 
 	// Server
 	s := &http.Server{
