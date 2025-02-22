@@ -9,6 +9,9 @@ LOCATION := us-central1-docker.pkg.dev
 
 all: build
 
+build: dep ## Build the binary file
+	go build
+
 local:
 	docker build . -t $(SERVICE_NAME)
 	docker run -p 80:80 $(SERVICE_NAME):latest
