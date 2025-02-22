@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/olympsis/storage/middleware"
 	"github.com/olympsis/storage/service"
+	"github.com/olympsis/storage/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,12 +21,12 @@ func main() {
 	l := logrus.New()
 
 	// Environment variables
-	port := os.Getenv("STORAGE_PORT")
+	config := utils.GetServerConfig()
 
 	// Create Service
 	// Connect to Storage & Computer Vision clients
 	n := service.NewStorageService(l)
-	err := n.ConnectToClient()
+	err := n.ConnectToClient(config)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -48,7 +49,7 @@ func main() {
 
 	// Server
 	s := &http.Server{
-		Addr:         `:` + port,
+		Addr:         `:` + config.Port,
 		Handler:      mux,
 		IdleTimeout:  60 * time.Second,
 		ReadTimeout:  60 * time.Second,
@@ -57,7 +58,7 @@ func main() {
 
 	// Start server
 	go func() {
-		l.Info(`Starting storage service at...` + port)
+		l.Info(`Starting storage service at...` + config.Port)
 		err := s.ListenAndServe()
 
 		if err != nil {

@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 
 	"cloud.google.com/go/storage"
 	vision "cloud.google.com/go/vision/v2/apiv1"
 	"github.com/gorilla/mux"
+	"github.com/olympsis/storage/utils"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/api/option"
 )
@@ -19,11 +19,9 @@ func NewStorageService(l *logrus.Logger) *Service {
 	return &Service{Logger: l}
 }
 
-func (s *Service) ConnectToClient() error {
-	filePath := os.Getenv("FIREBASE_CREDENTIALS_PATH")
-
+func (s *Service) ConnectToClient(config *utils.ServerConfig) error {
 	// Storage Client
-	client, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(filePath))
+	client, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(config.FirebaseFilePath))
 	if err != nil {
 		s.Logger.Fatal("Failed to create client: " + err.Error())
 		return err
@@ -31,7 +29,7 @@ func (s *Service) ConnectToClient() error {
 	s.Client = client
 
 	// Computer Vision Client
-	vClient, err := vision.NewImageAnnotatorClient(context.TODO(), option.WithCredentialsFile(filePath))
+	vClient, err := vision.NewImageAnnotatorClient(context.TODO(), option.WithCredentialsFile(config.FirebaseFilePath))
 	if err != nil {
 		s.Logger.Fatal("Failed to create client: " + err.Error())
 		return err
