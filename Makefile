@@ -17,10 +17,10 @@ docker:
 	$(MAKE) docker-run
 
 docker-build:
-	docker build . -f ./tools/Dockerfile -t $(NAME)
+	docker build . -t $(NAME)
 
 docker-run:
-	docker run -p 7002:80 $(NAME):latest
+	docker run -p 7002:80 -v $(PWD)/files:/app/files $(NAME):latest
 
 artifact:
 	docker build . -t $(NAME) --platform linux/amd64 --build-arg VERSION=$(VERSION)
