@@ -21,6 +21,6 @@ docker-run:
 	docker run -p 7002:80 -v $(PWD)/files:/app/files $(NAME):latest
 
 artifact:
-	docker build . -t $(SERVICE_NAME) --platform linux/amd64 --build-arg VERSION=$(VERSION)
-	docker tag $(SERVICE_NAME) $(LOCATION)/$(PROJECT_ID)/$(SERVICE_NAME)/release:$(VERSION)
-	docker push $(LOCATION)/$(PROJECT_ID)/$(SERVICE_NAME)/release:$(VERSION)
+	docker build . -t $(NAME) --platform linux/amd64 --build-arg VERSION=$(VERSION)
+	docker tag $(NAME) $(LOCATION)/$(PROJECT_ID)/$(NAME)/release:$(VERSION)
+	docker push $(LOCATION)/$(PROJECT_ID)/$(NAME)/release:$(VERSION)
