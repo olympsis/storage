@@ -24,3 +24,8 @@ artifact:
 	docker build . -t $(NAME) --platform linux/amd64 --build-arg VERSION=$(VERSION)
 	docker tag $(NAME) $(LOCATION)/$(PROJECT_ID)/$(NAME)/release:$(VERSION)
 	docker push $(LOCATION)/$(PROJECT_ID)/$(NAME)/release:$(VERSION)
+
+artifact-dev:
+	docker build . -t $(NAME) --build-arg VERSION=$(VERSION)
+	docker tag $(NAME) $(LOCATION)/$(PROJECT_ID)/$(NAME)/dev:$(VERSION)
+	docker push $(LOCATION)/$(PROJECT_ID)/$(NAME)/dev:$(VERSION)
