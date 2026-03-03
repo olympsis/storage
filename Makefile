@@ -1,8 +1,6 @@
 NAME := storage
 VERSION := v0.3.0
-
-REPO_NAME := main
-PROJECT_ID := olympsis-408521
+PROJECT_ID := olympsis-485522
 LOCATION := us-central1-docker.pkg.dev
 
 .PHONY: all dep build clean test coverage coverhtml lint
@@ -23,6 +21,6 @@ docker-run:
 	docker run -p 7002:80 -v $(PWD)/files:/app/files $(NAME):latest
 
 artifact:
-	docker build . -t $(NAME) --platform linux/amd64 --build-arg VERSION=$(VERSION)
-	docker tag $(NAME) $(LOCATION)/$(PROJECT_ID)/$(REPO_NAME)/$(NAME):$(VERSION)
-	docker push $(LOCATION)/$(PROJECT_ID)/$(REPO_NAME)/$(NAME):$(VERSION)
+	docker build . -t $(SERVICE_NAME) --platform linux/amd64 --build-arg VERSION=$(VERSION)
+	docker tag $(SERVICE_NAME) $(LOCATION)/$(PROJECT_ID)/$(SERVICE_NAME)/release:$(VERSION)
+	docker push $(LOCATION)/$(PROJECT_ID)/$(SERVICE_NAME)/release:$(VERSION)
