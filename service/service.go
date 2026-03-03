@@ -21,7 +21,7 @@ func NewStorageService(l *logrus.Logger) *Service {
 
 func (s *Service) ConnectToClient(config *utils.ServerConfig) error {
 	// Storage Client
-	client, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(config.FirebaseFilePath))
+	client, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(config.CredentialsFilePath))
 	if err != nil {
 		s.Logger.Fatal("Failed to create client: " + err.Error())
 		return err
@@ -29,7 +29,7 @@ func (s *Service) ConnectToClient(config *utils.ServerConfig) error {
 	s.Client = client
 
 	// Computer Vision Client
-	vClient, err := vision.NewImageAnnotatorClient(context.TODO(), option.WithCredentialsFile(config.FirebaseFilePath))
+	vClient, err := vision.NewImageAnnotatorClient(context.TODO(), option.WithCredentialsFile(config.CredentialsFilePath))
 	if err != nil {
 		s.Logger.Fatal("Failed to create client: " + err.Error())
 		return err

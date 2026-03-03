@@ -13,14 +13,14 @@ func GetServerConfig() *ServerConfig {
 		logLevel = "INFO"
 	}
 
-	firebaseFilePath := os.Getenv("FIREBASE_FILE_PATH")
-	if firebaseFilePath == "" {
-		panic("firebase file path required in environment variables")
+	filePath := os.Getenv("CREDENTIALS_FILE_PATH")
+	if filePath == "" {
+		panic("Credentials file path required in environment variables")
 	}
 
 	return &ServerConfig{
-		Port:             port,
-		LogLevel:         logLevel,
-		FirebaseFilePath: firebaseFilePath,
+		Port:                port,
+		LogLevel:            logLevel,
+		CredentialsFilePath: filePath,
 	}
 }

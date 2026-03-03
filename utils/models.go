@@ -1,7 +1,7 @@
 package utils
 
 type ServerConfig struct {
-	Port             string
-	LogLevel         string
-	FirebaseFilePath string
+	Port                string
+	LogLevel            string
+	CredentialsFilePath string
 }
