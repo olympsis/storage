@@ -1,5 +1,5 @@
 NAME := storage
-VERSION := v0.3.0
+VERSION := v0.3.1
 PROJECT_ID := olympsis-485522
 LOCATION := us-central1-docker.pkg.dev
 

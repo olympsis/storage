@@ -83,6 +83,13 @@ func (s *Service) UploadObject() http.HandlerFunc {
 
 		var response Response
 
+		// Ensure the Vision API returned at least one response
+		if resp == nil || len(resp.Responses) == 0 {
+			s.Logger.Error("Vision API returned empty response")
+			http.Error(rw, `{ "msg" : "failed to validate image" }`, http.StatusInternalServerError)
+			return
+		}
+
 		// Safety Score
 		safety := s.AggregateSafetyScore(resp.Responses[0])
 		response.Score = *safety

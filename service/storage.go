@@ -74,8 +74,13 @@ func (s *Service) AnnotateImage(image []byte) (*visionpb.BatchAnnotateImagesResp
 }
 
 func (s *Service) AggregateSafetyScore(response *visionpb.AnnotateImageResponse) *int {
-	annotation := response.SafeSearchAnnotation
 	score := 0
+
+	// Guard against nil response or missing annotation
+	if response == nil || response.SafeSearchAnnotation == nil {
+		return &score
+	}
+	annotation := response.SafeSearchAnnotation
 
 	// Adult/Racy content check
 	if annotation.Adult == visionpb.Likelihood_VERY_LIKELY {
